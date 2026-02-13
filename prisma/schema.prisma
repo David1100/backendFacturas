@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Categoria {
+  id        Int     @id @default(autoincrement())
+  nombre    String  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  productos  Producto[]
+}
+
+model Cliente {
+  id        Int     @id @default(autoincrement())
+  nombre    String  @unique
+  empresa   String?
+  direccion String?
+  telefono  String?
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  facturas   Factura[]
+}
+
+model Producto {
+  id        Int     @id @default(autoincrement())
+  nombre    String  @unique
+  descripcion String?
+  precio    Float
+  stock     Int     @default(0)
+  categoriaId  Int?
+  categoria  Categoria? @relation(fields: [categoriaId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  detalles  DetalleFactura[]
+}
+
+model Servicio {
+  id        Int     @id @default(autoincrement())
+  nombre    String  @unique
+  descripcion String?
+  precio    Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  detalles  DetalleFactura[]
+}
+
+model Factura {
+  id        Int     @id @default(autoincrement())
+  numero    String  @unique
+  fecha     DateTime @default(now())
+  monto     Float
+  estado    String  @default("pendiente")
+  clienteId  Int?
+  cliente    Cliente? @relation(fields: [clienteId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  detalles  DetalleFactura[]
+}
+
+model DetalleFactura {
+  id          Int     @id @default(autoincrement())
+  facturaId   Int
+  factura     Factura @relation(fields: [facturaId], references: [id], onDelete: Cascade)
+  productoId  Int?
+  producto    Producto? @relation(fields: [productoId], references: [id])
+  servicioId  Int?
+  servicio    Servicio? @relation(fields: [servicioId], references: [id])
+  cantidad    Int     @default(1)
+  precioUnitario Float
+  subtotal    Float
+  createdAt   DateTime @default(now())
+}
