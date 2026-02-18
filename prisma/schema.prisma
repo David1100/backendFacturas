@@ -1,86 +1,82 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 model Categoria {
-  id        Int     @id @default(autoincrement())
-  nombre    String  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  productos  Producto[]
+  id        Int        @id @default(autoincrement())
+  nombre    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime
+  productos Producto[]
 }
 
 model Cliente {
-  id        Int     @id @default(autoincrement())
-  nombre    String  @unique
+  id        Int       @id @default(autoincrement())
+  nombre    String    @unique
   empresa   String?
   direccion String?
   telefono  String?
   email     String?
-  nit      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  facturas   Factura[]
+  nit       String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime
+  facturas  Factura[]
 }
 
 model Producto {
-  id        Int     @id @default(autoincrement())
-  nombre    String  @unique
+  id          Int              @id @default(autoincrement())
+  nombre      String           @unique
   descripcion String?
-  precio    Decimal @db.Decimal(10,2)
-  stock     Int     @default(0)
-  categoriaId  Int?
-  iva      Float   @default(0.0)
-  categoria  Categoria? @relation(fields: [categoriaId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  detalles  DetalleFactura[]
+  precio      Decimal          @db.Decimal(10, 2)
+  stock       Int              @default(0)
+  categoriaId Int?
+  iva         Float            @default(0.0)
+  createdAt   DateTime         @default(now())
+  detalles    DetalleFactura[]
+  categoria   Categoria?       @relation(fields: [categoriaId], references: [id])
 }
 
 model Servicio {
-  id        Int     @id @default(autoincrement())
-  nombre    String  @unique
+  id          Int              @id @default(autoincrement())
+  nombre      String           @unique
   descripcion String?
-  precio    Decimal @db.Decimal(10,2)
-  iva      Decimal @db.Decimal(5,2)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  detalles  DetalleFactura[]
+  precio      Decimal          @db.Decimal(10, 2)
+  iva         Decimal          @db.Decimal(5, 2)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime
+  detalles    DetalleFactura[]
 }
 
 model Factura {
-  id        Int     @id @default(autoincrement())
-  numero    String  @unique
-  fecha     DateTime @default(now())
-  monto     Decimal @db.Decimal(10,2)
-  descuento Decimal @db.Decimal(5,2) @default(0.0)
-  estado    String  @default("pendiente")
-  clienteId  Int?
-  cliente    Cliente? @relation(fields: [clienteId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int              @id @default(autoincrement())
+  numero    String           @unique
+  fecha     DateTime         @default(now())
+  monto     Decimal          @db.Decimal(10, 2)
+  descuento Decimal          @default(0.0) @db.Decimal(5, 2)
+  estado    String           @default("pendiente")
+  clienteId Int?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime
   detalles  DetalleFactura[]
+  cliente   Cliente?         @relation(fields: [clienteId], references: [id])
 }
 
 model DetalleFactura {
-  id          Int     @id @default(autoincrement())
-  facturaId   Int
-  factura     Factura @relation(fields: [facturaId], references: [id], onDelete: Cascade)
-  productoId  Int?
-  producto    Producto? @relation(fields: [productoId], references: [id])
-  servicioId  Int?
-  servicio    Servicio? @relation(fields: [servicioId], references: [id])
-  cantidad    Int     @default(1)
-  precioUnitario Decimal @db.Decimal(10,2)
-  subtotal    Decimal @db.Decimal(10,2)
-  createdAt   DateTime @default(now())
+  id             Int       @id @default(autoincrement())
+  facturaId      Int
+  productoId     Int?
+  servicioId     Int?
+  cantidad       Int       @default(1)
+  precioUnitario Decimal   @db.Decimal(10, 2)
+  subtotal       Decimal   @db.Decimal(10, 2)
+  createdAt      DateTime  @default(now())
+  factura        Factura   @relation(fields: [facturaId], references: [id], onDelete: Cascade)
+  producto       Producto? @relation(fields: [productoId], references: [id])
+  servicio       Servicio? @relation(fields: [servicioId], references: [id])
 }
