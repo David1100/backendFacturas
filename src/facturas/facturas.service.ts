@@ -11,16 +11,13 @@ export class FacturasService {
   ) { }
 
   async create(createFacturaDto: CreateFacturaDto) {
-    const { numero, detalles, clienteId } = createFacturaDto;
-
-
-    const monto = detalles.reduce((sum, detalle) => sum + detalle.subtotal, 0);
-
+    const { numero, detalles, clienteId, monto, descuento } = createFacturaDto;
 
     return this.prisma.factura.create({
       data: {
         numero,
         monto,
+        descuento,
         clienteId,
         detalles: {
           create: detalles,

@@ -10,5 +10,7 @@ export class CreateFacturaDto {
   numero: string;
   estado?: string;
   clienteId: number;
+  monto: number;
+  descuento?: number;
   detalles: CreateDetalleFacturaDto[];
 }
