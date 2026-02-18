@@ -127,31 +127,27 @@ export class PdfService {
 
         // Detalles de la factura
 
+        let subtotal = 0;
         factura.detalles.forEach((detalle: any, index: number) => {
           const descripcion = detalle.producto?.nombre || detalle.servicio?.nombre || 'Sin descripción';
           const cantidad = detalle.cantidad;
           const precioUnitario = detalle.precioUnitario;
-
           const iva = detalle.producto?.iva || detalle.servicio?.iva || 0;
-
           // IVA por item
           const ivaItem = precioUnitario * cantidad * iva / 100;
           const subtotalItem = precioUnitario * cantidad;
           const totalItem = subtotalItem + ivaItem;
-
+          subtotal += totalItem;
           if (index % 2 === 0) {
             doc.rect(30, yPos - 5, 535, 18).fill('#f8f9fa');
             doc.fill('black');
           }
-
           doc.fontSize(9).font('Helvetica');
           doc.text(cantidad.toString(), col1X, yPos, { width: 25, align: 'center' });
-          doc.text(descripcion, col2X, yPos, { width: 240 });
+          doc.text(descripcion, col2X, yPos, { width: 180 });
           doc.text(`$ ${Math.round(precioUnitario).toLocaleString("es-CO")}`, col3X, yPos, { width: 70, align: 'right' });
           doc.text(`${iva}%`, col4X, yPos, { width: 60, align: 'center' });
           doc.text(`$ ${Math.round(totalItem).toLocaleString("es-CO")}`, col5X, yPos, { width: 90, align: 'right' });
-
-
           yPos += 18;
         });
 
@@ -168,7 +164,7 @@ export class PdfService {
         // Espaciado entre totales
         doc.fontSize(8).font('Helvetica-Bold');
         doc.text('SUBTOTAL:', totalLabelX - 20, yPos);
-        doc.text(`$ ${Math.round(factura.monto + (factura.monto * (factura.descuento / 100))).toLocaleString("es-CO")}`, totalValueX, yPos, { align: 'right', width: 100 });
+        doc.text(`$ ${Math.round(subtotal).toLocaleString("es-CO")}`, totalValueX, yPos, { align: 'right', width: 100 });
         yPos += 15;
         doc.fontSize(8).font('Helvetica-Bold');
         doc.text('DESCUENTO:', totalLabelX - 20, yPos);
