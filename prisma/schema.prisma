@@ -59,7 +59,6 @@ model Factura {
   estado    String           @default("pendiente")
   clienteId Int?
   createdAt DateTime         @default(now())
-  updatedAt DateTime
   detalles  DetalleFactura[]
   cliente   Cliente?         @relation(fields: [clienteId], references: [id])
 }
