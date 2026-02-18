@@ -33,10 +33,11 @@ export class FacturasService {
   }
 
   async findAll(findFacturaDto: FindFacturaDto) {
-    
+
     const page = Number(findFacturaDto.page) || 1;
     const perPage = Number(findFacturaDto.per_page) || 10;
     const search = findFacturaDto.search || "";
+    const searchState = findFacturaDto.searchState || "";
     const skip = (page - 1) * perPage;
     const take = perPage;
 
@@ -46,6 +47,10 @@ export class FacturasService {
         numero: {
           contains: search,
         },
+        
+      }),
+      ...(searchState && {
+        estado: searchState,
       }),
     };
 
@@ -145,10 +150,20 @@ export class FacturasService {
     const factura = await this.prisma.factura.findUnique({
       where: { numero },
       include: {
-        detalles: true,
         cliente: true,
-      },
+        detalles: {
+          include: {
+            producto: {
+              select: { nombre: true, iva: true }
+            },
+            servicio: {
+              select: { nombre: true, iva: true }
+            }
+          }
+        }
+      }
     });
+
 
     if (!factura) {
       throw new Error('Factura no encontrada');

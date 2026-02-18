@@ -3,4 +3,5 @@ export class UpdateProductoDto {
   descripcion?: string;
   precio?: number;
   stock?: number;
+  iva?: number;
 }

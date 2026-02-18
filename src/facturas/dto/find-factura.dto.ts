@@ -16,4 +16,8 @@ export class FindFacturaDto {
   @IsString()
   search?: string;
 
+  @IsOptional()
+  @IsString()
+  searchState?: string;
+
 }

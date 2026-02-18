@@ -34,7 +34,7 @@ export class PdfService {
         doc.on('error', reject);
 
         // ==================== ENCABEZADO ====================
-        
+
         // Agregar logo
         try {
           const logoPath = path.join(process.cwd(), 'src', 'assets', 'logo.jpeg');
@@ -47,7 +47,7 @@ export class PdfService {
 
         doc.fontSize(18).font('Helvetica-Bold').text('STSCAMTIC S.A.S.', 120, 35);
         doc.fontSize(10).font('Helvetica').text('COTIZACIÓN', 350, 35, { align: 'right', width: 215 });
-        
+
         // Información de la empresa
         doc.fontSize(8).font('Helvetica');
         doc.text('Calle 123 # 24 San Francisco', 120, 55);
@@ -67,16 +67,20 @@ export class PdfService {
 
         // ==================== DATOS DEL CLIENTE ====================
         let yPos = 120;
-        
+
         doc.fontSize(10).font('Helvetica-Bold').text('DATOS DE LA EMPRESA', 30, yPos);
         yPos += 20;
-        
+
         doc.fontSize(9).font('Helvetica');
         if (factura.cliente) {
           doc.text(`CLIENTE: ${factura.cliente.nombre}`, 30, yPos);
           yPos += 15;
           if (factura.cliente.empresa) {
             doc.text(`EMPRESA: ${factura.cliente.empresa}`, 30, yPos);
+            yPos += 15;
+          }
+          if (factura.cliente.empresa) {
+            doc.text(`NIT: ${factura.cliente.nit}`, 30, yPos);
             yPos += 15;
           }
           if (factura.cliente.direccion) {
@@ -101,44 +105,55 @@ export class PdfService {
 
         // Headers de la tabla
         const headerY = yPos;
-        const col1X = 30;      // CANT.
-        const col2X = 60;      // DESCRIPCIÓN
-        const col3X = 380;     // P. UNITARIO
-        const col4X = 460;     // TOTAL
+        const col1X = 30;
+        const col2X = 70;
+        const col3X = 340;
+        const col4X = 430;
+        const col5X = 500;
+
 
         // Fondo de headers
         doc.rect(30, headerY - 5, 535, 20).fill('#2c3e50');
-        
+
         doc.fontSize(9).font('Helvetica-Bold').fill('white');
         doc.text('CANT.', col1X, headerY, { width: 25 });
-        doc.text('DESCRIPCIÓN', col2X, headerY, { width: 310 });
+        doc.text('DESCRIPCIÓN', col2X, headerY, { width: 100 });
         doc.text('P. UNITARIO', col3X, headerY, { width: 70 });
-        doc.text('TOTAL', col4X, headerY, { width: 60 });
+        doc.text('IVA', col4X, headerY, { width: 60, align: 'center' });
+        doc.text('TOTAL', col5X, headerY, { width: 60, align: 'right' });
 
         doc.fill('black');
         yPos += 25;
 
         // Detalles de la factura
-        let subtotal = 0;
+        let totalGeneral = 0;
+
         factura.detalles.forEach((detalle: any, index: number) => {
           const descripcion = detalle.producto?.nombre || detalle.servicio?.nombre || 'Sin descripción';
           const cantidad = detalle.cantidad;
           const precioUnitario = detalle.precioUnitario;
-          const total = detalle.subtotal;
 
-          // Fondo alternado
+          const iva = detalle.producto?.iva || detalle.servicio?.iva || 0;
+
+          // IVA por item
+          const ivaItem = precioUnitario * cantidad * iva / 100;
+          const subtotalItem = precioUnitario * cantidad;
+          const totalItem = subtotalItem + ivaItem;
+
           if (index % 2 === 0) {
             doc.rect(30, yPos - 5, 535, 18).fill('#f8f9fa');
             doc.fill('black');
           }
 
           doc.fontSize(9).font('Helvetica');
-          doc.text(cantidad.toString(), col1X, yPos, { width: 25 });
-          doc.text(descripcion, col2X, yPos, { width: 310 });
+          doc.text(cantidad.toString(), col1X, yPos, { width: 25, align: 'center' });
+          doc.text(descripcion, col2X, yPos, { width: 240 });
           doc.text(`$ ${this.formatPrice(precioUnitario)}`, col3X, yPos, { width: 70, align: 'right' });
-          doc.text(`$ ${this.formatPrice(total)}`, col4X, yPos, { width: 60, align: 'right' });
+          doc.text(`${iva}%`, col4X, yPos, { width: 60, align: 'center' });
+          doc.text(`$ ${this.formatPrice(totalItem)}`, col5X, yPos, { width: 60, align: 'right' });
 
-          subtotal += total;
+          totalGeneral += totalItem;
+
           yPos += 18;
         });
 
@@ -152,39 +167,21 @@ export class PdfService {
         const totalLabelX = 400;
         const totalValueX = 480;
 
-        doc.fontSize(9).font('Helvetica');
-        doc.text('Subtotal:', totalLabelX, yPos);
-        doc.text(`$ ${this.formatPrice(subtotal)}`, totalValueX, yPos, { align: 'right', width: 75 });
-
-        yPos += 18;
-        doc.text('IVA (19%):', totalLabelX, yPos);
-        const iva = subtotal * 0.19;
-        doc.text(`$ ${this.formatPrice(iva)}`, totalValueX, yPos, { align: 'right', width: 75 });
-
-        yPos += 18;
-        doc.text('Impuestos:', totalLabelX, yPos);
-        doc.text('$ 0.00', totalValueX, yPos, { align: 'right', width: 75 });
-
-        yPos += 18;
-        doc.text('Gastos:', totalLabelX, yPos);
-        doc.text('$ 0.00', totalValueX, yPos, { align: 'right', width: 75 });
-
-        // Total final en negrita
         yPos += 20;
         doc.fontSize(11).font('Helvetica-Bold');
-        doc.text('TOTAL B/s.:', totalLabelX - 20, yPos);
-        const total = subtotal + iva;
-        doc.text(`$ ${this.formatPrice(total)}`, totalValueX, yPos, { align: 'right', width: 75 });
+        doc.text('TOTAL:', totalLabelX - 20, yPos);
+        doc.text(`$ ${this.formatPrice(totalGeneral)}`, totalValueX, yPos, { align: 'right', width: 75 });
+
 
         // ==================== TÉRMINOS Y CONDICIONES ====================
         yPos += 40;
         doc.fontSize(9).font('Helvetica-Bold').text('TÉRMINOS Y CONDICIONES', 30, yPos);
         yPos += 15;
-        
+
         doc.fontSize(8).font('Helvetica');
         const terms = `• Esta cotización esta sujeta a los términos y condiciones que se mencionan en la construcción.
 • Duración de la oferta 15 días`;
-        
+
         doc.text(terms, 30, yPos, { width: 510, align: 'left' });
 
         doc.end();

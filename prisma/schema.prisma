@@ -7,7 +7,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Categoria {
@@ -25,6 +26,7 @@ model Cliente {
   direccion String?
   telefono  String?
   email     String?
+  nit      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   facturas   Factura[]
@@ -34,9 +36,10 @@ model Producto {
   id        Int     @id @default(autoincrement())
   nombre    String  @unique
   descripcion String?
-  precio    Float
+  precio    Decimal @db.Decimal(10,2)
   stock     Int     @default(0)
   categoriaId  Int?
+  iva      Float   @default(0.0)
   categoria  Categoria? @relation(fields: [categoriaId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -47,7 +50,8 @@ model Servicio {
   id        Int     @id @default(autoincrement())
   nombre    String  @unique
   descripcion String?
-  precio    Float
+  precio    Decimal @db.Decimal(10,2)
+  iva      Decimal @db.Decimal(5,2)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   detalles  DetalleFactura[]
@@ -57,7 +61,8 @@ model Factura {
   id        Int     @id @default(autoincrement())
   numero    String  @unique
   fecha     DateTime @default(now())
-  monto     Float
+  monto     Decimal @db.Decimal(10,2)
+  descuento Decimal @db.Decimal(5,2) @default(0.0)
   estado    String  @default("pendiente")
   clienteId  Int?
   cliente    Cliente? @relation(fields: [clienteId], references: [id])
@@ -75,7 +80,7 @@ model DetalleFactura {
   servicioId  Int?
   servicio    Servicio? @relation(fields: [servicioId], references: [id])
   cantidad    Int     @default(1)
-  precioUnitario Float
-  subtotal    Float
+  precioUnitario Decimal @db.Decimal(10,2)
+  subtotal    Decimal @db.Decimal(10,2)
   createdAt   DateTime @default(now())
 }
