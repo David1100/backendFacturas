@@ -120,13 +120,12 @@ export class PdfService {
         doc.text('DESCRIPCIÓN', col2X, headerY, { width: 100 });
         doc.text('P. UNITARIO', col3X, headerY, { width: 70 });
         doc.text('IVA', col4X, headerY, { width: 60, align: 'center' });
-        doc.text('TOTAL', col5X, headerY, { width: 60, align: 'right' });
+        doc.text('TOTAL', col5X, headerY, { width: 80, align: 'right' });
 
         doc.fill('black');
         yPos += 25;
 
         // Detalles de la factura
-        let totalGeneral = 0;
 
         factura.detalles.forEach((detalle: any, index: number) => {
           const descripcion = detalle.producto?.nombre || detalle.servicio?.nombre || 'Sin descripción';
@@ -148,11 +147,10 @@ export class PdfService {
           doc.fontSize(9).font('Helvetica');
           doc.text(cantidad.toString(), col1X, yPos, { width: 25, align: 'center' });
           doc.text(descripcion, col2X, yPos, { width: 240 });
-          doc.text(`$ ${this.formatPrice(precioUnitario)}`, col3X, yPos, { width: 70, align: 'right' });
+          doc.text(`$ ${Math.round(precioUnitario).toLocaleString("es-CO")}`, col3X, yPos, { width: 70, align: 'right' });
           doc.text(`${iva}%`, col4X, yPos, { width: 60, align: 'center' });
-          doc.text(`$ ${this.formatPrice(totalItem)}`, col5X, yPos, { width: 60, align: 'right' });
+          doc.text(`$ ${Math.round(totalItem).toLocaleString("es-CO")}`, col5X, yPos, { width: 80, align: 'right' });
 
-          totalGeneral += totalItem;
 
           yPos += 18;
         });
@@ -168,9 +166,15 @@ export class PdfService {
         const totalValueX = 480;
 
         yPos += 20;
+        doc.fontSize(8).font('Helvetica-Bold');
+        doc.text('SUBTOTAL:', totalLabelX - 20, yPos);
+        doc.text(`$ ${Math.round(factura.monto + (factura.monto * (factura.descuento / 100))).toLocaleString("es-CO")}`, totalValueX, yPos, { align: 'right', width: 75 });
+        doc.fontSize(8).font('Helvetica-Bold');
+        doc.text('DESCUENTO:', totalLabelX - 20, yPos);
+        doc.text(`$ ${Math.round(factura.monto * (factura.descuento / 100)).toLocaleString("es-CO")}`, totalValueX, yPos, { align: 'right', width: 75 });
         doc.fontSize(11).font('Helvetica-Bold');
         doc.text('TOTAL:', totalLabelX - 20, yPos);
-        doc.text(`$ ${this.formatPrice(totalGeneral)}`, totalValueX, yPos, { align: 'right', width: 75 });
+        doc.text(`$ ${Math.round(factura.monto).toLocaleString("es-CO")}`, totalValueX, yPos, { align: 'right', width: 75 });
 
 
         // ==================== TÉRMINOS Y CONDICIONES ====================
