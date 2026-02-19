@@ -109,7 +109,7 @@ export class PdfService {
         const col2X = 70;
         const col3X = 340;
         const col4X = 430;
-        const col5X = 500;
+        const col5X = 470;
 
 
         // Fondo de headers
@@ -120,7 +120,7 @@ export class PdfService {
         doc.text('DESCRIPCIÓN', col2X, headerY, { width: 100 });
         doc.text('P. UNITARIO', col3X, headerY, { width: 70 });
         doc.text('IVA', col4X, headerY, { width: 60, align: 'center' });
-        doc.text('TOTAL', col5X, headerY, { width: 90, align: 'right' });
+        doc.text('TOTAL', col5X, headerY, { width: 60, align: 'right' });
 
         doc.fill('black');
         yPos += 25;
