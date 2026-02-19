@@ -164,15 +164,15 @@ export class PdfService {
         // Espaciado entre totales
         doc.fontSize(8).font('Helvetica-Bold');
         doc.text('SUBTOTAL:', totalLabelX - 20, yPos);
-        doc.text(`$ ${Math.round(subtotal).toLocaleString("es-CO")}`, totalValueX, yPos, { align: 'right', width: 60 });
+        doc.text(`$ ${Math.round(subtotal).toLocaleString("es-CO")}`, totalValueX, yPos, { align: 'right', width: 80 });
         yPos += 15;
         doc.fontSize(8).font('Helvetica-Bold');
         doc.text('DESCUENTO:', totalLabelX - 20, yPos);
-        doc.text(`$ ${Math.round(factura.monto * (factura.descuento / 100)).toLocaleString("es-CO")}`, totalValueX, yPos, { align: 'right', width: 60 });
+        doc.text(`$ ${Math.round(factura.monto * (factura.descuento / 100)).toLocaleString("es-CO")}`, totalValueX, yPos, { align: 'right', width: 80 });
         yPos += 15;
         doc.fontSize(11).font('Helvetica-Bold');
         doc.text('TOTAL:', totalLabelX - 20, yPos);
-        doc.text(`$ ${Math.round(factura.monto).toLocaleString("es-CO")}`, totalValueX, yPos, { align: 'right', width: 60 });
+        doc.text(`$ ${Math.round(factura.monto).toLocaleString("es-CO")}`, totalValueX, yPos, { align: 'right', width: 80 });
 
 
         // ==================== TÉRMINOS Y CONDICIONES ====================
